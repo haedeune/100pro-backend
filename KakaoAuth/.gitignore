@@ -1,0 +1,23 @@
+# 환경 변수 (API 키 등 비공개 정보)
+.env
+
+# 가상환경
+.venv/
+venv/
+env/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
