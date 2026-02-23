@@ -51,9 +51,16 @@ app.include_router(
 )
 
 from app.infrastructure.task_miss import router as task_miss_router  # noqa: E402
+from app.infrastructure.task_strategy import router as task_strategy_router  # noqa: E402
 
 app.include_router(
     task_miss_router,
     prefix="/task-miss",
     tags=["task-miss [PRO-B-10]"],
+)
+
+app.include_router(
+    task_strategy_router,
+    prefix="/task-strategy",
+    tags=["task-strategy [PRO-B-21]"],
 )

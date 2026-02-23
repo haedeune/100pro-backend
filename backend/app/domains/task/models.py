@@ -5,7 +5,7 @@ Task 도메인 모델.
 import enum
 from datetime import datetime
 
-from sqlalchemy import Column, DateTime, Enum, Integer, String, Text, func
+from sqlalchemy import Boolean, Column, DateTime, Enum, Integer, String, Text, func
 
 from app.core.database import Base
 
@@ -35,5 +35,6 @@ class Task(Base):
     )
     user_id = Column(String(64), nullable=False, index=True)
     due_date = Column(DateTime, nullable=False, index=True)
+    is_archived = Column(Boolean, nullable=False, default=False, index=True)  # [PRO-B-21]
     created_at = Column(DateTime, nullable=False, server_default=func.now())
     updated_at = Column(DateTime, nullable=False, server_default=func.now(), onupdate=func.now())
