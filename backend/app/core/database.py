@@ -41,4 +41,5 @@ def init_db() -> None:
     import app.domains.task.models  # noqa: F401 — 모델 등록
     import app.infrastructure.task_archive.models  # noqa: F401 — [PRO-B-23] 보관함·이력 모델
     import app.infrastructure.task_tracking.models  # noqa: F401 — [PRO-B-24] 행동 로그·실험 할당
+    import app.infrastructure.task_params.models  # noqa: F401 — [PRO-B-16] 시스템 파라미터
     Base.metadata.create_all(bind=get_engine())
