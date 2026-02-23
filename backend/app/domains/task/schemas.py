@@ -1,0 +1,41 @@
+"""
+Task 도메인 요청/응답 스키마.
+"""
+from datetime import datetime
+from typing import Optional
+
+from pydantic import BaseModel, Field
+
+from app.domains.task.models import TaskStatus
+
+
+class TaskResponse(BaseModel):
+    """과업 단건 응답."""
+
+    id: int
+    title: str
+    description: Optional[str] = None
+    status: TaskStatus
+    user_id: str
+    due_date: datetime
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = {"from_attributes": True}
+
+
+class CumulativeMissCountResponse(BaseModel):
+    """사용자별 누적 task_miss 카운트 응답."""
+
+    user_id: str = Field(..., description="사용자 식별자")
+    cumulative_miss_count: int = Field(..., description="누적 task_miss 횟수")
+    cached: bool = Field(..., description="Redis 캐시 적중 여부")
+    timestamp: datetime = Field(..., description="조회 시각 (ms 단위 정밀도)")
+
+
+class TaskMissBatchResultResponse(BaseModel):
+    """배치 실행 결과 응답."""
+
+    transitioned_count: int = Field(..., description="task_miss로 전환된 과업 수")
+    execution_time_ms: float = Field(..., description="배치 실행 소요 시간(ms)")
+    timestamp: datetime = Field(..., description="배치 실행 시각")
