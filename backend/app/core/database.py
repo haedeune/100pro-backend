@@ -39,4 +39,5 @@ def get_session_factory() -> sessionmaker[Session]:
 def init_db() -> None:
     """모든 모델 테이블을 생성한다. 앱 시작 시 1회 호출."""
     import app.domains.task.models  # noqa: F401 — 모델 등록
+    import app.infrastructure.task_archive.models  # noqa: F401 — [PRO-B-23] 보관함·이력 모델
     Base.metadata.create_all(bind=get_engine())

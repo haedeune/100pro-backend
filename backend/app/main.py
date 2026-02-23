@@ -52,6 +52,7 @@ app.include_router(
 
 from app.infrastructure.task_miss import router as task_miss_router  # noqa: E402
 from app.infrastructure.task_strategy import router as task_strategy_router  # noqa: E402
+from app.infrastructure.task_archive import router as task_archive_router  # noqa: E402
 
 app.include_router(
     task_miss_router,
@@ -63,4 +64,10 @@ app.include_router(
     task_strategy_router,
     prefix="/task-strategy",
     tags=["task-strategy [PRO-B-21]"],
+)
+
+app.include_router(
+    task_archive_router,
+    prefix="/task-archive",
+    tags=["task-archive [PRO-B-23]"],
 )
