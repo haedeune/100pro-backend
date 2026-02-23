@@ -29,9 +29,11 @@ async def lifespan(app: FastAPI):
     init_db()
 
     from app.infrastructure.task_params.defaults import seed_defaults
+    from app.infrastructure.experiment_config.defaults import seed_experiment_config
     from app.core.database import get_session_factory
     with get_session_factory()() as session:
         seed_defaults(session)
+        seed_experiment_config(session)
 
     scheduler = TaskMissScheduler()
     scheduler.start()
@@ -60,6 +62,7 @@ from app.infrastructure.task_strategy import router as task_strategy_router  # n
 from app.infrastructure.task_archive import router as task_archive_router  # noqa: E402
 from app.infrastructure.task_tracking import router as task_tracking_router  # noqa: E402
 from app.infrastructure.task_params import router as task_params_router  # noqa: E402
+from app.infrastructure.experiment_config import router as experiment_config_router  # noqa: E402
 
 app.include_router(
     task_miss_router,
@@ -89,4 +92,10 @@ app.include_router(
     task_params_router,
     prefix="/params",
     tags=["params [PRO-B-16]"],
+)
+
+app.include_router(
+    experiment_config_router,
+    prefix="/experiment-config",
+    tags=["experiment-config [PRO-B-22]"],
 )

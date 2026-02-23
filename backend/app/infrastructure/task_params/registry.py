@@ -25,6 +25,9 @@ def _cast_value(raw: str, value_type: str) -> Any:
         return float(raw)
     if value_type == "bool":
         return raw.lower() in ("true", "1", "yes")
+    if value_type == "json":  # [PRO-B-22] 배열/객체 타입 지원
+        import json
+        return json.loads(raw)
     return raw
 
 
