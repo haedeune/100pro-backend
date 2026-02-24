@@ -121,11 +121,48 @@ async def kakao_login(kakao_data: schemas.KakaoLogin, db: Session = Depends(get_
         db.commit()
         db.refresh(user)
     elif not user.social_id:
-        # Existing email account → link Kakao
-        user.social_id = social_id
-        user.provider = "kakao"
-        db.commit()
-        db.refresh(user)
+        # Existing email account → Collision found. Require password validation.
+        temp_token = security.create_temp_token(data={"sub": str(user.id), "social_id": social_id})
+        raise HTTPException(
+            status_code=409,
+            detail={
+                "code": "ACCOUNT_COLLISION_REQUIRE_PASSWORD",
+                "message": "이미 이메일로 가입된 계정이 있습니다. 본인 확인을 위해 기존 비밀번호를 입력해 주세요.",
+                "data": {
+                    "email": email,
+                    "oauth_provider": "KAKAO",
+                    "temp_token": temp_token
+                }
+            }
+        )
+    elif user.social_id != social_id:
+        # Rare case: email already linked to a DIFFERENT kakao account
+        raise HTTPException(status_code=400, detail="이메일이 다른 소셜 계정에 이미 연동되어 있습니다.")
 
+    access_token = security.create_access_token(data={"sub": str(user.id)})
+    return {"access_token": access_token, "token_type": "bearer", "user": user}
+
+@router.post("/link-account", response_model=schemas.TokenWithUser)
+def link_account(data: schemas.LinkAccountRequest, db: Session = Depends(get_db)):
+    payload = security.verify_temp_token(data.temp_token)
+    if not payload:
+        raise HTTPException(status_code=401, detail="임시 토큰이 만료되었거나 유효하지 않습니다.")
+    
+    user_id_str = payload.get("sub")
+    social_id = payload.get("social_id")
+    
+    user = db.query(models.User).filter(models.User.id == int(user_id_str)).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="사용자를 찾을 수 없습니다.")
+        
+    if not user.password_hash or not security.verify_password(data.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="비밀번호가 일치하지 않습니다.")
+        
+    # Link account
+    user.social_id = social_id
+    user.provider = "kakao"
+    db.commit()
+    db.refresh(user)
+    
     access_token = security.create_access_token(data={"sub": str(user.id)})
     return {"access_token": access_token, "token_type": "bearer", "user": user}

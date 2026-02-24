@@ -10,6 +10,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config.env import load_env
 
+# 환경 변수를 앱 로딩 최상단에서 우선 로드하여, 하위 모듈이 안전하게 os.getenv 가능토록 함
+load_env()
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s.%(msecs)03d [%(levelname)s] %(name)s — %(message)s",
@@ -19,9 +22,7 @@ logging.basicConfig(
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """앱 시작 시 .env 로드 → DB 초기화 → 스케줄러 시작. 종료 시 스케줄러·Redis 정리."""
-    load_env()
-
+    """앱 시작 시 DB 초기화 → 스케줄러 시작. 종료 시 스케줄러·Redis 정리."""
     from app.core.database import init_db
     from app.core.redis import close_redis
     from app.infrastructure.task_miss import TaskMissScheduler

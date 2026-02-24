@@ -30,3 +30,7 @@ class TokenWithUser(BaseModel):
 
 class KakaoLogin(BaseModel):
     code: str  # Kakao Authorization Code
+
+class LinkAccountRequest(BaseModel):
+    temp_token: str
+    password: str
