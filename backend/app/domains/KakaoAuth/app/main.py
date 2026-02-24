@@ -6,8 +6,8 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.core.env import load_env
-from app.domains.kakao_authentication import router as kakao_router
+from app.domains.KakaoAuth.app.core.env import load_env
+##from app.domains.kakao_authentication import router as kakao_router
 
 
 @asynccontextmanager
@@ -23,8 +23,8 @@ app = FastAPI(
     version="1.0.0",
     lifespan=lifespan,
 )
-app.include_router(
-    kakao_router,
-    prefix="/kakao-authentication",
-    tags=["kakao-authentication"],
-)
+##app.include_router(
+##    kakao_router,
+##    prefix="/kakao-authentication",
+##    tags=["kakao-authentication"],
+##)

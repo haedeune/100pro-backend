@@ -7,8 +7,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.core.env import load_env
-from app.domains.kakao_authentication import router as kakao_router
+from app.domains.KakaoAuth.app.core.env import load_env
 
 logging.basicConfig(
     level=logging.INFO,
@@ -22,16 +21,16 @@ async def lifespan(app: FastAPI):
     """앱 시작 시 .env 로드 → DB 초기화 → 스케줄러 시작. 종료 시 스케줄러·Redis 정리."""
     load_env()
 
-    from app.core.database import init_db
-    from app.core.redis import close_redis
-    from app.infrastructure.task_miss import TaskMissScheduler
+    from backend.app.core.database import init_db
+    from backend.app.core.redis import close_redis
+    from backend.app.infrastructure.task_miss import TaskMissScheduler
 
     init_db()
 
-    from app.infrastructure.task_params.defaults import seed_defaults
-    from app.infrastructure.experiment_config.defaults import seed_experiment_config
-    from app.infrastructure.trigger_config.defaults import seed_trigger_config  # [PRO-B-25]
-    from app.core.database import get_session_factory
+    from backend.app.infrastructure.task_params.defaults import seed_defaults
+    from backend.app.infrastructure.experiment_config.defaults import seed_experiment_config
+    from backend.app.infrastructure.trigger_config.defaults import seed_trigger_config  # [PRO-B-25]
+    from backend.app.core.database import get_session_factory
     with get_session_factory()() as session:
         seed_defaults(session)
         seed_experiment_config(session)
@@ -53,19 +52,20 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-app.include_router(
-    kakao_router,
-    prefix="/kakao-authentication",
-    tags=["kakao-authentication"],
-)
 
-from app.infrastructure.task_miss import router as task_miss_router  # noqa: E402
-from app.infrastructure.task_strategy import router as task_strategy_router  # noqa: E402
-from app.infrastructure.task_archive import router as task_archive_router  # noqa: E402
-from app.infrastructure.task_tracking import router as task_tracking_router  # noqa: E402
-from app.infrastructure.task_params import router as task_params_router  # noqa: E402
-from app.infrastructure.experiment_config import router as experiment_config_router  # noqa: E402
-from app.infrastructure.trigger_config import router as trigger_config_router  # noqa: E402 [PRO-B-25]
+##app.include_router(
+##    kakao_router,
+##    prefix="/kakao-authentication",
+##    tags=["kakao-authentication"],
+##)
+
+from backend.app.infrastructure.task_miss import router as task_miss_router  # noqa: E402
+from backend.app.infrastructure.task_strategy import router as task_strategy_router  # noqa: E402
+from backend.app.infrastructure.task_archive import router as task_archive_router  # noqa: E402
+from backend.app.infrastructure.task_tracking import router as task_tracking_router  # noqa: E402
+from backend.app.infrastructure.task_params import router as task_params_router  # noqa: E402
+from backend.app.infrastructure.experiment_config import router as experiment_config_router  # noqa: E402
+from backend.app.infrastructure.trigger_config import router as trigger_config_router  # noqa: E402 [PRO-B-25]
 
 app.include_router(
     task_miss_router,
