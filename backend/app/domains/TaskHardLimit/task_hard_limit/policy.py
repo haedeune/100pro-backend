@@ -3,8 +3,8 @@
 import logging
 from typing import Optional
 
-from task_hard_limit.exceptions import MaxActiveTasksExceededError
-from task_hard_limit.settings import get_max_active_task_count
+from app.domains.TaskHardLimit.task_hard_limit.exceptions import MaxActiveTasksExceededError
+from app.domains.TaskHardLimit.task_hard_limit.settings import get_max_active_task_count
 
 logger = logging.getLogger(__name__)
 
