@@ -1,0 +1,22 @@
+title: "앱 진입 후 무행동 지속 시간을 감지하여 InactionTriggerSeconds 초과 시 실험군/대조군 분기에 따라 
+개입 트리거 이벤트를 발행하는 구조를 추가한다."
+
+success criteria:
+
+- 앱 진입 후 첫 액션 없이 경과한 시간을 서버 또는 클라이언트에서 측정할 수 있다.
+- 경과 시간이 `InactionTriggerSeconds` 를 초과하는 시점을 감지할 수 있다.
+- 사용자 단위 실험군/대조군 분기 로직이 적용된다.
+- 실험군에 한해 개입 트리거 이벤트가 발행되고, 대조군은 개입 없이 유지된다.
+- 분기 결과, 개입 발행 여부, 이후 사용자 첫 액션 발생 여부가 이벤트로 기록되어 실험 분석이 가능하다.
+
+todos:
+
+- `intervention_log` 테이블을 정의한다.
+  `log_id(PK), user_id(FK), session_id, experiment_group, triggered_at, first_action_after_trigger_at, created_at`
+- 세션 내 무행동 경과 시간을 추적하고 `InactionTriggerSeconds` 초과 여부를 판단하는 로직을 추가한다.
+- 사용자 단위 A/B 실험 분기 로직을 추가한다.
+- 실험군 판별 시 개입 트리거 이벤트를 발행하는 분기 구조를 추가한다.
+- 대조군 판별 시 개입 없이 세션을 유지하는 분기 구조를 추가한다.
+- 분기 결과 및 개입 트리거 발행 여부를 `intervention_log` 테이블에 INSERT하는 쿼리를 구현한다.
+- 개입 이후 첫 액션 발생 시각을 UPDATE하는 쿼리를 구현한다.
+- `user_id`, `session_id`, `experiment_group`, `triggered_at`, `first_action_after_trigger_at` 을 로그에 기록하는 구조를 추가한다.

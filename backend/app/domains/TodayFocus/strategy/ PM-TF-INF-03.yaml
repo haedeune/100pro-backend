@@ -1,0 +1,20 @@
+title: "앱 진입 후 세션 종료까지의 행동 시퀀스를 기록하여 이탈 직전 무행동 구간과 app_close 시점을 저장하는 구조를 추가한다."
+
+success criteria:
+
+- 앱 진입부터 종료까지 발생한 액션 시퀀스가 사용자 단위로 기록된다.
+- 마지막 액션 발생 시각과 `app_close_at` 의 차이(이탈 직전 무행동 구간)를 산출할 수 있다.
+- `app_close_at` 이 `first_action_at` 으로부터 60초 이내인 세션을 분류할 수 있다.
+- 이탈 직전 무행동 구간이 기준값 이상인 세션을 고위험 이탈 세션으로 분류하여 저장할 수 있다.
+- 산출된 값이 로그 또는 저장소에 기록되어 사후 분석이 가능하다.
+
+todos:
+
+- `session_log` 테이블에 `last_action_at`, `app_close_at`, `pre_exit_inaction_ms`, `is_high_risk_exit` 컬럼을 추가한다.
+- 세션 내 마지막 액션 발생 시각을 갱신하는 로직을 추가한다.
+- `app_close` 이벤트 수신 시 `app_close_at` 을 기록하고 `pre_exit_inaction_ms = app_close_at - last_action_at` 을 계산하는 로직을 추가한다.
+- `app_close_at - app_open_at ≤ 60s` 조건을 만족하는 세션을 조기 이탈 세션으로 분류하는 로직을 추가한다.
+- `pre_exit_inaction_ms` 가 기준값 이상인 세션을 `is_high_risk_exit = true` 로 저장하는 분기 구조를 추가한다.
+- `app_close` 이벤트 수신 시 `session_log` 테이블의 해당 레코드를 UPDATE하는 쿼리를 구현한다.
+- `is_high_risk_exit = true` 기준으로 세션을 조회하는 쿼리를 구현한다.
+- `session_id`, `user_id`, `last_action_at`, `app_close_at`, `pre_exit_inaction_ms`, `is_high_risk_exit` 를 로그에 기록하는 구조를 추가한다.

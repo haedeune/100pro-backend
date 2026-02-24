@@ -1,0 +1,20 @@
+title: "앱 진입 이벤트 수신 시 세션 시작 시각과 첫 액션 발생 시각을 기록하여 ReEntryLatency를 산출하는 구조를 추가한다."
+
+success criteria:
+
+- 앱 진입 이벤트 수신 시점의 `user_id`, `session_id`, `app_open_at` 이 기록된다.
+- 첫 액션(목표 생성 또는 체크) 발생 시점의 `first_action_at` 이 사용자 단위로 기록된다.
+- `ReEntryLatency = first_action_at - app_open_at` 값이 산출되어 저장된다.
+- 첫 액션 없이 세션이 종료된 경우 `first_action_at = null` 로 기록되어 이탈 세션으로 분류된다.
+- 산출된 값이 로그 또는 저장소에 기록되어 사후 분석이 가능하다.
+
+todos:
+
+- `session_log` 테이블을 정의한다.
+  `session_id(PK), user_id(FK), app_open_at, first_action_at, reentry_latency_ms, action_type, created_at`
+- 앱 진입 이벤트 수신 시 `app_open_at` 을 기록하는 로직을 추가한다.
+- 첫 액션 발생 이벤트 수신 시 `first_action_at` 을 기록하고 `ReEntryLatency` 를 계산하는 로직을 추가한다.
+- 세션 종료 시점까지 첫 액션이 없는 경우 `first_action_at = null` 로 저장하는 분기 구조를 추가한다.
+- `session_log` 테이블에 진입/액션/종료 이벤트를 INSERT/UPDATE하는 쿼리를 구현한다.
+- `user_id` + `app_open_at` 기준으로 세션을 조회하는 쿼리를 구현한다.
+- `session_id`, `user_id`, `reentry_latency_ms`, `action_type`, 세션 종료 여부를 로그에 기록하는 구조를 추가한다.

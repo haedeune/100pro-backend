@@ -1,16 +1,15 @@
 """
 전략 선택 API 라우터 [PRO-B-21].
-과업 상태 전환(Archive/Modify/Keep), 실험 분기 조회, 활성 과업 목록 엔드포인트를 제공한다.
+과업 상태 전환(Archive/Modify/Keep), 실험 분기 조회 엔드포인트를 제공한다.
+활성 과업 목록(active-tasks)은 TodayFocus 도메인 라우터로 분리됨.
 """
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, HTTPException, Path
 
-from app.domains.task.schemas import TaskResponse
 from app.infrastructure.task_miss.service import TaskMissServiceImpl
 from app.infrastructure.task_strategy.experiment import ExperimentAssigner
 from app.infrastructure.task_strategy.schemas import (
-    ActiveTaskListResponse,
     ApplyStrategyRequest,
     ApplyStrategyResponse,
     ExperimentAssignmentResponse,
@@ -85,27 +84,5 @@ def get_experiment_assignment(
         eligible=result.eligible,
         feature_flag_enabled=result.feature_flag_enabled,
         group=result.group,
-        timestamp=datetime.now(timezone.utc),
-    )
-
-
-# ── 3. 활성 과업 목록 (보관 제외) ────────────────────────────
-
-@router.get(
-    "/users/{user_id}/active-tasks",
-    response_model=ActiveTaskListResponse,
-    summary="[PRO-B-21] 활성 과업 목록 조회 (보관 과업 제외)",
-)
-def get_active_tasks(
-    user_id: str = Path(..., description="사용자 식별자"),
-) -> ActiveTaskListResponse:
-    """is_archived=False인 과업만 반환한다. Archive 전략이 적용된 과업은 제외된다."""
-    service = _get_strategy_service()
-    tasks = service.get_active_tasks(user_id)
-    task_dtos = [TaskResponse.model_validate(t) for t in tasks]
-    return ActiveTaskListResponse(
-        user_id=user_id,
-        total_count=len(task_dtos),
-        tasks=task_dtos,
         timestamp=datetime.now(timezone.utc),
     )

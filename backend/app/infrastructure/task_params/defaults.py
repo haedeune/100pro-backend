@@ -85,6 +85,14 @@ PARAM_DEFAULTS: list[ParamDefault] = [
         category="policy",
         description="보관함 과업 재참여 유도 알림 주기 (일, Default: 3)",
     ),
+    # ── 4. TodayFocus (PM-TF-PAR-01) ──
+    ParamDefault(
+        key="TASK_DISPLAY_SCOPE",
+        value="today",
+        value_type="str",
+        category="today_focus",
+        description="[PM-TF-PAR-01] 홈 화면 할 일 표시 범위 (today: 당일 기준만, 기본값: today)",
+    ),
 ]
 
 
