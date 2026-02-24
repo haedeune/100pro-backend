@@ -6,8 +6,9 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
-from app.domains.KakaoAuth.app.core.env import load_env
+from app.config.env import load_env
 
 logging.basicConfig(
     level=logging.INFO,
@@ -52,6 +53,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 ##app.include_router(
 ##    kakao_router,
@@ -59,7 +68,8 @@ app = FastAPI(
 ##    tags=["kakao-authentication"],
 ##)
 
-from app.domains.TodayFocus.today_focus import router as today_focus_router  # noqa: E402
+from app.domains.auth.router import router as auth_router  # noqa: E402
+from app.domains.task.router import router as task_router  # noqa: E402
 from app.infrastructure.task_miss import router as task_miss_router  # noqa: E402
 from app.infrastructure.task_strategy import router as task_strategy_router  # noqa: E402
 from app.infrastructure.task_archive import router as task_archive_router  # noqa: E402
@@ -67,6 +77,18 @@ from app.infrastructure.task_tracking import router as task_tracking_router  # n
 from app.infrastructure.task_params import router as task_params_router  # noqa: E402
 from app.infrastructure.experiment_config import router as experiment_config_router  # noqa: E402
 from app.infrastructure.trigger_config import router as trigger_config_router  # noqa: E402 [PRO-B-25]
+
+app.include_router(
+    auth_router,
+    prefix="/auth",
+    tags=["Auth [PRO-B-33]"],
+)
+
+app.include_router(
+    task_router,
+    prefix="/tasks",
+    tags=["Tasks [PRO-B-36]"],
+)
 
 app.include_router(
     task_miss_router,

@@ -40,3 +40,18 @@ class TaskMissBatchResultResponse(BaseModel):
     transitioned_count: int = Field(..., description="task_miss로 전환된 과업 수")
     execution_time_ms: float = Field(..., description="배치 실행 소요 시간(ms)")
     timestamp: datetime = Field(..., description="배치 실행 시각")
+
+class TaskCreate(BaseModel):
+    title: str = Field(..., max_length=255)
+    description: Optional[str] = None
+    due_date: datetime
+
+class TaskUpdate(BaseModel):
+    title: Optional[str] = Field(None, max_length=255)
+    description: Optional[str] = None
+    status: Optional[TaskStatus] = None
+    is_archived: Optional[bool] = None
+
+class TaskBatchAction(BaseModel):
+    task_ids: list[int]
+    action: str  # 'archive' or 'delete'

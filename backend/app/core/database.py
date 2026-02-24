@@ -10,6 +10,9 @@ from sqlalchemy.orm import Session, declarative_base, sessionmaker
 
 _DEFAULT_DB_PATH = Path(__file__).resolve().parents[2] / "data" / "100pro.db"
 
+# Ensure the parent directory for the SQLite database exists
+_DEFAULT_DB_PATH.parent.mkdir(parents=True, exist_ok=True)
+
 Base = declarative_base()
 
 _engine = None
@@ -38,8 +41,11 @@ def get_session_factory() -> sessionmaker[Session]:
 
 def init_db() -> None:
     """모든 모델 테이블을 생성한다. 앱 시작 시 1회 호출."""
-    import app.domains.task.models  # noqa: F401 — 모델 등록
-    import app.infrastructure.task_archive.models  # noqa: F401 — [PRO-B-23] 보관함·이력 모델
-    import app.infrastructure.task_tracking.models  # noqa: F401 — [PRO-B-24] 행동 로그·실험 할당
-    import app.infrastructure.task_params.models  # noqa: F401 — [PRO-B-16] 시스템 파라미터
+    import app.domains.auth.models  # noqa: F401
+    import app.domains.task.models  # noqa: F401
+    import app.infrastructure.task_archive.models  # noqa: F401
+    import app.infrastructure.task_tracking.models  # noqa: F401
+    import app.infrastructure.task_params.models  # noqa: F401
+    import app.infrastructure.experiment_config.config  # noqa: F401
+    import app.infrastructure.trigger_config.settings  # noqa: F401
     Base.metadata.create_all(bind=get_engine())
