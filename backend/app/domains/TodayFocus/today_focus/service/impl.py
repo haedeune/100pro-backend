@@ -31,3 +31,7 @@ class TodayFocusServiceImpl(TodayFocusServiceProtocol):
     def record_action(self, session_id: str, action_at: datetime) -> None:
         """[PM-TF-INF-02 STEP 3] 액션 시 first_action_at(첫 액션만), reentry_latency_ms(첫 액션만), last_action_at 갱신."""
         self._session_log_repository.update_on_action(session_id, action_at)
+
+    def record_app_close(self, session_id: str, app_close_at: datetime) -> None:
+        """[PM-TF-INF-03 STEP 4] app_close 시 app_close_at, pre_exit_inaction_ms, is_high_risk_exit 기록."""
+        self._session_log_repository.update_on_app_close(session_id, app_close_at)
