@@ -16,7 +16,7 @@ class TaskResponse(BaseModel):
     title: str
     description: Optional[str] = None
     status: TaskStatus
-    user_id: str
+    user_id: int
     due_date: datetime
     is_archived: bool = False
     created_at: datetime
