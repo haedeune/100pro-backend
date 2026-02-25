@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from fastapi import APIRouter, Path
 
 from app.domains.task.schemas import TaskResponse
-from app.domains.TodayFocus.today_focus.schemas import AppOpenRequest, AppOpenResponse
+from app.domains.TodayFocus.today_focus.schemas import ActionRequest, AppOpenRequest, AppOpenResponse
 from app.domains.TodayFocus.today_focus.service import TodayFocusServiceImpl
 from app.infrastructure.task_strategy.schemas import ActiveTaskListResponse
 
@@ -37,6 +37,13 @@ def app_open(body: AppOpenRequest) -> AppOpenResponse:
         app_open_at = app_open_at.astimezone(timezone.utc).replace(tzinfo=None)
     session_log = service.record_app_open(body.user_id, app_open_at)
     return AppOpenResponse.model_validate(session_log)
+
+
+@router.post("/session/action", status_code=204, summary="[PM-TF-INF-02 STEP 3] 액션 이벤트")
+def record_action(body: ActionRequest) -> None:
+    service = _get_today_focus_service()
+    action_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    service.record_action(body.session_id, action_at)
 
 
 @router.get(

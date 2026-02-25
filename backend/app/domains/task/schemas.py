@@ -45,12 +45,14 @@ class TaskCreate(BaseModel):
     title: str = Field(..., max_length=255)
     description: Optional[str] = None
     due_date: datetime
+    session_id: Optional[str] = Field(None, description="[STEP 3] 액션 시 session_log first_action_at / last_action_at 갱신용")
 
 class TaskUpdate(BaseModel):
     title: Optional[str] = Field(None, max_length=255)
     description: Optional[str] = None
     status: Optional[TaskStatus] = None
     is_archived: Optional[bool] = None
+    session_id: Optional[str] = Field(None, description="[STEP 3] 액션 시 session_log last_action_at 갱신용")
 
 class TaskBatchAction(BaseModel):
     task_ids: list[int]

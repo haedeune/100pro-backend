@@ -21,3 +21,7 @@ class AppOpenResponse(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class ActionRequest(BaseModel):
+    session_id: str

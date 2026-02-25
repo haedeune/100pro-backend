@@ -15,3 +15,7 @@ class TodayFocusServiceProtocol:
     def record_app_open(self, user_id: str, app_open_at: datetime) -> SessionLog:
         """[PM-TF-INF-01] app_open 이벤트 수신 시 세션 생성. experiment_group="A" 저장."""
         ...
+
+    def record_action(self, session_id: str, action_at: datetime) -> None:
+        """[PM-TF-INF-02 STEP 3] 액션 시 first_action_at(첫 액션만), reentry_latency_ms(첫 액션만), last_action_at 갱신."""
+        ...
