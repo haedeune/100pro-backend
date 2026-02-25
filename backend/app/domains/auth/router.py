@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from typing import Optional
 
 from app.core.database import get_session_factory
 from app.domains.auth import models, schemas, security
@@ -65,7 +66,11 @@ import httpx
 import os
 
 @router.post("/kakao", response_model=schemas.TokenWithUser)
-async def kakao_login(kakao_data: schemas.KakaoLogin, db: Session = Depends(get_db)):
+async def kakao_login(
+    kakao_data: schemas.KakaoLogin,
+    db: Session = Depends(get_db),
+    current_user: Optional[models.User] = Depends(security.get_current_user_optional)
+):
     kakao_client_id = os.getenv("KAKAO_CLIENT_ID")
     kakao_redirect_uri = os.getenv("KAKAO_REDIRECT_URI")
     kakao_client_secret = os.getenv("KAKAO_CLIENT_SECRET", "")
@@ -91,7 +96,9 @@ async def kakao_login(kakao_data: schemas.KakaoLogin, db: Session = Depends(get_
         )
 
     if token_res.status_code != 200:
-        raise HTTPException(status_code=400, detail="Failed to exchange authorization code with Kakao")
+        error_msg = token_res.text
+        print(f"[Kakao Error] Token Exchange Failed: {error_msg}")
+        raise HTTPException(status_code=400, detail=f"Failed to exchange authorization code with Kakao. Error: {error_msg}")
 
     kakao_access_token = token_res.json().get("access_token")
 
@@ -109,6 +116,27 @@ async def kakao_login(kakao_data: schemas.KakaoLogin, db: Session = Depends(get_
     social_id = str(kakao_user.get("id"))
     email = kakao_user.get("kakao_account", {}).get("email", f"{social_id}@kakao.com")
     name = kakao_user.get("properties", {}).get("nickname", "KakaoUser")
+
+    # NEW: If user is actively logged in and requesting to link Kakao
+    if current_user:
+        # Check if another user already owns this social_id
+        existing = db.query(models.User).filter(models.User.social_id == social_id).first()
+        if existing and existing.id != current_user.id:
+            raise HTTPException(status_code=409, detail="이 카카오 계정은 이미 다른 사용자에 연동되어 있습니다.")
+        
+        # Merge the user object from the security dependency's session into the current route's session
+        current_user = db.merge(current_user)
+        current_user.social_id = social_id
+        current_user.provider = "kakao"
+        
+        # 이름도 카카오에 등록된 이름으로 덮어씁니다.
+        if name and name != "KakaoUser":
+            current_user.name = name
+            
+        db.commit()
+        db.refresh(current_user)
+        access_token = security.create_access_token(data={"sub": str(current_user.id)})
+        return {"access_token": access_token, "token_type": "bearer", "user": current_user}
 
     # 3. Find or create user (unified account)
     user = db.query(models.User).filter(

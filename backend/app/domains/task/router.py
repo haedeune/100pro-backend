@@ -1,4 +1,5 @@
 from datetime import datetime, timezone, timedelta
+import zoneinfo
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -72,9 +73,12 @@ def create_task(
 ):
     # [PRO-B-35] 미래 날짜 차단
     start_of_day, end_of_day = get_today_bounds()
-    # Assuming task_data.due_date is provided timezone naive or local
-    # Replace timezone info appropriately or strip if simple comparison is desired
-    due_date_naive = task_data.due_date.replace(tzinfo=None)
+    
+    if task_data.due_date.tzinfo is not None:
+        local_tz = zoneinfo.ZoneInfo("Asia/Seoul")
+        due_date_naive = task_data.due_date.astimezone(local_tz).replace(tzinfo=None)
+    else:
+        due_date_naive = task_data.due_date
     
     if due_date_naive >= end_of_day:
         raise HTTPException(
